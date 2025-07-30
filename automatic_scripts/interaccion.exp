@@ -1,0 +1,9 @@
+#!/usr/bin/expect -f
+set url_direccion [lindex $argv 0]
+set archivo_query [lindex $argv 1]
+spawn scp -i emr-keypair.pem $archivo_query ec2-user@$url_direccion:/home/ec2-user/tpcds_query.sql
+expect {
+      *: {send "yes\r" ; exp_continue}
+      eof exit
+ }
+
