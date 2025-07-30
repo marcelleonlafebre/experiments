@@ -1,8 +1,0 @@
-[
-  {
-    "Classification": "presto-connector-hive",
-    "Properties": {
-      "hive.metastore": "glue"
-    }
-  }
-]
