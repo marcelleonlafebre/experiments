@@ -1,4 +1,4 @@
-# Non-functional properties of Distributed Systems in AWS EMR
+# Experimentation with AWS EMR Clusters vs Athena
 **Author:** Marcel León Lafebré
 
 **Introduction**
