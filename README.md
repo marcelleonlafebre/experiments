@@ -10,51 +10,29 @@ Below is the instruction manual.
 
 **Introduction**
 
-This guide lets students observe and analyze some non-functional properties of Distributed
-Systems, including performance, fault tolerance, and scalability, through a series of hands-on
-experiments. The experiments involve executing SQL queries on a data lake, using Apache
-Spark on AWS EMR.
+This guide lets scientist, researchers, students or industry people observe of hands-on experiments about the alternative with the use of EMR Clusters versus Athena to exec queries of Big Data. The experiments involve executing SQL queries on a data lake, using Apache Spark, Hieve and Presto on AWS EMR.
 
-The following sections outline the teaching objectives of this guide and highlight the intended
-audience and prerequisites. This laboratory guide has been designed for execution within an
-AWS Academy Learner Lab environment.
+The following sections outline the teaching objectives of this guide and highlight the intended audience and prerequisites. This laboratory guide has been designed for execution within an AWS Account environment.
 
 **Objectives**
 
 This laboratory guide will teach you how to:
-* Use AWS services such as Athena and EMR to analyze large data volumes and
-the Cloudwatch tool to monitor the metrics of an EMR cluster.
+* Use AWS services such as Athena and EMR to analyze large data volumes.
 * Prepare an environment for benchmarking a Big Data platform with the benchmark
 “TPC-DS” on AWS.
-* Configure and launch an Elastic MapReduce (EMR) cluster running Spark.
-* Measure the performance of an EMR cluster.
-* Observe how an EMR cluster uses redundancy to achieve fault tolerance behavior.
-* Observe the scalability of an EMR cluster.
-
-**Intended audience**
-
-This laboratory guide is tailored for students pursuing undergraduate or graduate studies in
-Computer Science or related programs, who are interested in gaining practical experience in
-deploying an EMR cluster in AWS and understanding the impact of different configuration options on
-the non-functional properties of these clusters.
+* Launch an Elastic MapReduce (EMR) cluster through Automatic Scripts.
+* Execution of the experiments.
 
 **Prerequisites**
 
-We recommend that students have prior knowledge of Distributed Systems and Big Data concepts,
-as well as familiarity with AWS academy and to run the Lab Environment furthermore the AWS tools
-and services. Specifically the creation of rules to enable server ports and access from specific IPs,
-as well as using key pairs to access the nodes. Students can refer to the Appendix section if
-needed.
+We recommend that people have prior knowledge of Distributed Systems and Big Data concepts, as well as familiarity with AWS services and AWS Command Line Interface to run the Lab Environment. Furthermore the features of EC2 in order to creation of rules to enable server ports and access from specific IPs, as well as using key pairs to access the nodes. You can refer to the Appendix section if needed.
 
 # Sections
 This guide has the following key sections:
 1. [Process for setting up an environment with TPC-DS in AWS for benchmarking Big Data querying platforms.](#process-for-setting-up-an-environment-with-tpc-ds-in-aws-for-benchmarking-big-data-querying-platforms)
-2. [Configure and run an EMR Cluster with access to the TPC-DS Big Data repository.](#configure-and-run-an-emr-cluster-with-access-to-the-tpc-ds-big-data-repository)
-3. [Observe the fault tolerance behavior in an EMR cluster using redundancy.](#observe-the-fault-tolerance-behavior-in-an-emr-cluster-using-redundancy)
-4. [Observe measurements of the performance of an EMR Cluster using CloudWatch.](#observe-measurements-of-the-performance-of-an-emr-cluster-using-cloudwatch)
-5. [Observe the scalability of an EMR cluster.](#observe-the-scalability-of-an-emr-cluster)
-6. [Appendix: Pre-requisite knowledge; refer to this section if it is unclear how to execute one or more steps in the guide.](#appendix-pre-requisite-knowledge;-refer-to-this-section-if-it-is-unclear-how-to-execute-one-or-more-steps-in-the-guide)
-7. [References.](#references)
+2. [Launch an Elastic MapReduce (EMR) cluster through Automatic Scripts.](#configure-and-run-an-emr-cluster-with-access-to-the-tpc-ds-big-data-repository)
+3. [Observe the logs of experiments.](#observe-the-scalability-of-an-emr-cluster)
+4. [Appendix: Pre-requisite knowledge; refer to this section if it is unclear how to execute one or more steps in the guide.](#appendix-pre-requisite-knowledge;-refer-to-this-section-if-it-is-unclear-how-to-execute-one-or-more-steps-in-the-guide)
    
 ## Process for setting up an environment with TPC-DS in AWS for benchmarking Big Data querying platforms
 
@@ -233,125 +211,6 @@ ssh -i emr-keypair.pem ec2-user@IP address of the primary node public DNS.
 If you can not connect to your cluster, go to the **_ec2 instance_** and set the appropriate **_inbound
 rule_**, as indicated in the [Appendix](#appendix:-pre-requisite-knowledge;-refer-to-this-section-if-it-is-unclear-how-to-execute-one-or-more-steps-in-the-guide).
 
-## Observe the fault tolerance behavior in an EMR cluster using redundancy
-Fault tolerance is a very important property for a system that offers services even when one or
-more components fail (Priti Kumari and Parmeet Kaur, 2021). Redundancy is the basic
-technique of fault tolerance that focuses on duplicating crucial resources or elements in the
-system (Kamil, I. A., & Al-Askari, M. A., 2024).\
-You need access to the cluster connecting for SSH protocol with its public IP address,, log in
-with the default user **_“ec2-user”_** and use the key-pair as was explained at the end of the
-previous section.\
-Next, you have to elevate privileges to root with the following command:
-```
-sudo su -
-```
-Enter to the environment of Spark and launch queries with the spark-sql tool using the following
-command:
-```
-spark-sql
-```
-Run the command **_“use”_** to locate the database previously created as follows:
-```
-use tpcds_1tbrs;
-```
-Note that every command executed in spark-sql must end with a semi-colon (;). You can
-modify the queries in this lab to experiment with other examples. For example, you can
-execute a count of the inventory table that has 11.67GB in total size with the following
-command:
-```
-select * from inventory where inv_date_sk = 2451466;
-```
-For you to understand how Apache Spark works, for the execution of the query of all rows of the
-inventory table on the EMR cluster, Spark must load in memory approximately 783 million
-records. The size of one record in the 'inventory' table is 16 bytes (source:
-https://www.tpc.org/tpc_documents_current_versions/pdf/tpc-ds_v2.1.0.pdf, page 36), requiring
-the cluster to have a capacity of nearly 12 GB of memory for our TPC-DS database experiment
-with a scale of 1 TB database.
-
-It's worth noting that, considering the constraints of the environment, the cluster was configured
-with 9 nodes, each with a size type "large" of EC2 instances and 8 GB of memory, totaling 72
-GB of memory in the cluster. Additionally, keep in mind that other processes and components
-within the cluster also use memory, such as the operating system and others.
-
-Returning to the experiment, you will use a variant of query number 21. Its execution takes
-almost 191 seconds in the EMR Cluster, more than 3 minutes. You have to copy and paste the
-following code into the server which is a variant of query 21 for running in Spark:
-```
-select *
-from(select w_warehouse_name
-            ,i_item_sk
-            ,sum(inv_quantity_on_hand) as inv_sum
-     from inventory, warehouse, item, date_dim
-     where i_current_price between 0.99 and 1.49
-     and i_item_sk=inv_item_sk
-     and inv_warehouse_sk=w_warehouse_sk
-     and inv_date_sk=d_date_sk
-     and d_date between cast('2000-02-11' as date) and cast('2000-04-11' as
-date) group by w_warehouse_name, i_item_sk) x
-where inv_sum between 0.6 and 1.5
-order by w_warehouse_name,i_item_sk
-limit 100;
-```
-**_Take into account that the following steps need to be executed while the query is
-running_**, for this is important to do it with a query that takes a minimum of 3 minutes to execute.
-
-You will manually introduce a failure in the cluster to test the fault tolerance properties of Spark
-going down a task node. For this, you have to **_enter the AWS console by browser_** go to
-the **_section of cluster details_** of the cluster running, and next enter the **_“Instance Groups”
-panel_** to **_set the instance group's size to zero_** for the node that you want to go down, using
-the **_resize option_** as the following image show:
-![Fault Tolerance Demo 1](img/ft_demo_1.png)
-> Is important to remark that if these steps are not followed, the EMR Cluster will attempt
-to launch a new instance of the node. If only one node is taken offline, the Cluster will
-use its default **Autoscaling** feature and deploy a new instance of the same node.
-
-Once you have identified the instance, take it offline using the **_button actions_** to stop it
-and verify its **_state_** changes to **_“stopping”_**.
-
-![Fault Tolerance Demo 2](img/ft_demo_2.png)
-![Fault Tolerance Demo 3](img/ft_demo_3.png)
-
-After some communication attempts while the node was down, the Spark EMR Cluster
-successfully executed the query with the same results as Athena.\
-The image below is the log with the error messages from the Spark cluster while the query is
-being executed.
-
-![Fault Tolerance Final](img/ft_final.png)
-Finally, as a complement it is important to remark that there are default parameters in the
-EMR Spark Cluster that are significant, such as the 100-second timeout for validating
-connections among nodes and the 30-minute timeout for query resolution.\
-This experiment showed that the Spark EMR Cluster can regulate its processes and function
-effectively to get the query results, even with one less node.\
-> Please remember that you'll have to terminate the cluster in the AWS to avoid the deactivation of the AWS account. You can only start one cluster at a time.  
-
-
-## Observe measurements of the performance of an EMR Cluster using CloudWatch
-The performance of an EMR Cluster can be observed with CloudWatch. It allows monitoring and
-visualizing metrics in 3 dimensions of an EMR Cluster: cluster state, state of nodes, and inputs
-and outputs such as S3, hard disk, and memory. For more details about this tool, see
-https://aws.amazon.com/es/cloudwatch/. The metrics in the CloudWatch dashboard offer
-real-time insights into the health and performance of the cluster and its nodes. These metrics
-provide valuable information on the processes of different jobs running their steps and the
-component negotiator for more resources
-(https://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/YARN.html).\
-You can review the following metrics while you run the query used in the demonstration of fault
-tolerance or run the following in the Spark cluster:
-```
-select count(1) from the inventory;
-```
-![Metrics](img/metrics.png)
-![Metrics](img/metrics1.png)
-The next two images show the metrics dashboard for a node. Cloudwatch lets us monitor the
-health and performance of all nodes in the EMR cluster. These metrics show the nodes in
-various states such as running, pending, rebooting, or experiencing problems.
-![Metrics](img/metrics2.png)
-![Metrics](img/metrics3.png)
-Moreover, the dashboard also presents metrics for inputs and outputs of the cluster, with a specific
-focus on memory indicators due to the use of Spark technology. In our case, the metrics related to
-storage are not relevant as our experiment uses data stored in S3.
-![Metrics](img/metrics4.png)
-![Metrics](img/metrics5.png)
-
 ## Observe the scalability of an EMR cluster
 Scalability is the ability of computer systems to generally increase but also decrease
 components to changes in processing demands for solving tasks (Sehgal, N. K., Bhatt, P. C. P.,
@@ -425,22 +284,3 @@ guide and delete the disk volumes created by default to save costs.
 Well done! You used the Amazon EMR service to demonstrate the non-functional properties of
 distributed systems like fault-tolerance and auto-scaling through the running of the Spark
 Cluster connected to a TPC-DS big data repository in S3.
-
-## References:
-
-* https://github.com/awslabs/amazon-redshift-utils/tree/master/src/CloudDataWarehouseB
-enchmark/Cloud-DWB-Derived-from-TPCDS/1TB (available online 2024 and created in 2022)
-* https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-overview-arch.html (available online 2024)
-* https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html (available online 2024)
-* https://aws.amazon.com/es/what-is/apache-spark/ (available online 2024)
-* https://docs.aws.amazon.com/cli/latest/reference/emr/create-default-roles.html (available online 2024)
-* https://aws.amazon.com/es/cloudwatch/ (available online 2024)
-* Priti Kumari and Parmeet Kaur, "A survey of fault tolerance in cloud computing," 2021
-Journal of King Saud University - Computer and - Information Sciences, pp. 1159-1176,
-doi: 10.1016/j.jksuci.2018.09.021.
-* Sehgal, N.K., Bhatt, P.C.P., Acken, J.M. (2023). Cloud Computing Scalability. In: Cloud
-Computing with Security and Scalability. Springer, Cham.
-https://doi.org/10.1007/978-3-031-07242-0_13
-* Kamil, I. A., & Al-Askari, M. A. (2024). Principles of Fault Tolerance in IT Systems: A
-Review.
-* https://www.tpc.org/tpc_documents_current_versions/pdf/tpc-ds_v2.1.0.pdf
