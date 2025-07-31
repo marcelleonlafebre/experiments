@@ -1,6 +1,13 @@
 # Experimentation with AWS EMR Clusters vs Athena
 **Author:** Marcel León Lafebré
 
+This repo is organized as follow: 
+- In the folder automatic_scrips are all the scrips used to exec experiments from a terminal.
+- In the folder sql_queries are the queries of TPC-DS 1 TB or 3 TB used in this experiments.
+- In the folder images are the figures used in this manual of instructions.
+
+Below is the instruction manual.
+
 **Introduction**
 
 This guide lets students observe and analyze some non-functional properties of Distributed
